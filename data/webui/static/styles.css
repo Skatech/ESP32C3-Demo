@@ -1,0 +1,32 @@
+html {
+	color-scheme: light dark;
+	font-family: sans-serif;
+}
+body { 
+	display: flex;
+	flex-direction: column;
+	width: 400px;
+	max-width: min(32em, 100vw);
+	height: calc(100dvh - 0.55em);
+	margin: 0 auto;
+	padding: 0;
+}
+hr {
+	margin: 0.5em 0;
+}
+div.links {
+	margin: 0.25em 0 1em 0;
+	width: 100%;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1em;
+}
+a {
+	margin: 0.25em 0;
+}
+a:link, a:visited, a:hover, a:active {
+    color: LinkText;
+}
+div.content {
+	margin: auto 0;
+}

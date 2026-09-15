@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="data:,">
+	<link rel="stylesheet" href="/styles.css">
+	<style>
+	form {
+		width: 90%;
+	}
+	form > span {	
+		display: block;
+		margin: 0.25em 0;
+		font-size: medium;
+		color: LinkText;
+	}
+	input[type=text] {
+		box-sizing: border-box;
+		margin-bottom: 2em;
+		padding: 0.1em 0;
+		width: 100%;
+		font-size: medium;
+	}
+	input[type=file] {
+		margin-bottom: 2em;
+		width: 100%;
+		font-size: medium;
+	}
+	input[type=submit], input[type=file]::file-selector-button {
+		margin-right: 0.5em;
+		padding: 0.1em 0;
+		min-width: 5.5em;
+		font-size: medium;
+	}
+	input[type=submit] {
+		float:right;
+	}
+	</style>
+	<title>File UPDATE</title>
+</head>
+<h1>File UPDATE</h1><hr>
+<div class="links">
+	<a href="/admin">ADMIN</a>
+</div>
+<div class="content">
+<form method="POST" action="" enctype="multipart/form-data">
+	<span>DEVICE PATH:</span>
+	<input type="text" name="path" placeholder="Device file path" required>
+	<span>UPLOAD FILE:</span>
+	<input type="file" accept="*/*" name="file" required>
+	<input type="submit" value="Upload">
+</form>
+</div><h1></h1>
+<script>
+document.querySelector("input[type=file]").onchange = function(e) {
+	document.querySelector("input[type=text]").value = "/webui/templates/" + e.target.value.match(/[^\\/]+$/)?.at(0)
+}
+</script>

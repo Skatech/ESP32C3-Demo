@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:,">
+	<link rel="stylesheet" href="/styles.css">
+	<style>
+		table {
+			margin: auto 0.25em;
+			font-size: 0.9rem;
+		}
+	</style>
+	<title>ESP32-C3 Demo - ADMIN</title>
+</head>
+<h1>Device ADMIN</h1>
+<hr>
+<div class="links">
+	<a href="/">INDEX</a>
+	<a href="/admin/logs">LOGS</a>
+	<a href="/admin/update">UPDATE</a>
+	<a href="/admin/logout">LOGOUT</a>
+	<a href="/admin/restart">RESTART</a>
+</div>
+<table></table>
+<script>
+function updateDocument(data) {
+	const table = document.querySelector("table")
+	for (const rec of data.matchAll(/^(.*?)[\t|:]\s*(.*)$/gm))
+		table.innerHTML += `<tr><td>${rec[1]}</td><td>${rec[2]}</td></tr>`
+	window.scrollTo(0, document.body.scrollHeight)
+}
+window.onload = async function() {
+	if (window.location.host) {
+		const response = await fetch(window.location.origin + "/data/status")
+		if (response.ok) {
+			const text = await response.text()
+			updateDocument(text)
+		}
+		else console.log("Data fetch error: " + response.statusText)
+	}
+}
+</script>
