@@ -4,7 +4,6 @@
 
 #include <util/noncopyable.h>
 #include <util/format.h>
-#include "WebServerEx.h"
 
 class WebPageBuilder {
     String _header, _title, _styles, _links, _scripts;

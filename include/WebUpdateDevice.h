@@ -8,8 +8,8 @@
 #include <util/format.h>
 #include <Log.h>
 #include <DelayedRestart.h>
-// #include "WebServerEx.h"
 #include "WebPageBuilder.h"
+#include "WebServerEx.h"
 
 class WebUpdateDevice {
     const __FlashStringHelper* _page;

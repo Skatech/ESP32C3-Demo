@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <ESPmDNS.h>
+#include <LittleFS.h>
 
 #include <util/format.h>
 #include <DateTime.h>
@@ -52,7 +53,7 @@ void httpInit() {
         if (HTTP.isAuthenticated()) {
             HTTP.client().setNoDelay(true);
             HTTP.html(WebPageBuilder(F("Device RESTART"))
-                .addReloadScript(3000, F("/admin")).toString(
+                .addReloadScript(5000, F("/admin")).toString(
                     F("<h2>SUCCEEDED</h2><h4>Wait until device restarted...</h4>")));
             RESTART.after(500);
         }
@@ -77,6 +78,7 @@ void httpInit() {
             report += format(F("\nStarted: %s"), UPTIME.getStartTime().toString().c_str());
             report += format(F("\nUptime: %s"), timeSpanToString(UPTIME.getUpTime()).c_str());
             report += format(F("\nHeap free: %lu"), ESP.getFreeHeap());
+            report += format(F("\nDisk used / total: %lu / %lu"), LittleFS.usedBytes(), LittleFS.totalBytes());
 
             // for(uint8_t i = 0; i < WEBSOCKETS_SERVER_CLIENT_MAX; ++i)
             //     if (SOCK.server().clientIsConnected(i))

@@ -4,5 +4,9 @@
         "limits": "cpp",
         "climits": "cpp",
         "ctime": "cpp"
+    },
+    "files.exclude": {
+        "**/.git": true,
+        "**/.pio": true
     }
 }

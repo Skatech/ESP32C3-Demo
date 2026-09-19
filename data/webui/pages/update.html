@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="data:,">
+	<link rel="stylesheet" href="/styles.css">
+	<style>
+	form {
+		display: flex;
+		flex-direction: column;
+		margin: 1.5em 0;
+	}
+	label {
+		color: LinkText;
+	}
+	input[type=text] {
+		box-sizing: border-box;
+		margin-bottom: 2em;
+		padding: 0.1em 0;
+		width: 100%;
+		font-size: medium;
+	}
+	input[type=submit] {
+		margin-left: auto;
+	}
+	input[type=submit], input[type=file]::file-selector-button {
+		padding: 0.1em 0;
+		min-width: 5.5em;
+		font-size: medium;
+	}
+	input[type=file] {
+		width: 100%;
+		margin-bottom: 2em;
+		font-size: medium;
+		color: CanvasText;
+	}
+	progress {
+		width: 100%;
+		margin: 1.5em 0;
+	}
+	.hidden {
+		visibility: hidden;
+	}
+	div.log {
+		overflow-y: auto;
+		/* border: 1px solid ButtonBorder; */
+		padding: 5px;
+		flex-grow: 1;
+		overflow-y: auto;
+		margin: 0;
+		white-space: pre;
+		font-family: consolas;
+		font-size: 0.9rem;
+	}
+	</style>
+	<title>Device UPDATE</title>
+</head>
+<h1>Device UPDATE</h1>
+<hr>
+<div class="links">
+	<a href='/'>INDEX</a>
+	<a href='/admin'>ADMIN</a>
+</div>
+<form method="POST" action="#" enctype="multipart/form-data">
+	<label>OUTPUT PATH:<input type="text" name="path" required disabled></label>
+	<label>UPLOAD FILE:<input type="file" name="file" accept="*/*" required></label>
+	<input type="submit" value="Upload">
+</form>
+<progress class="hidden" max="100" value="0">0%</progress>
+<div class="log"></div>
+
+<script>
+	const progress = $("progress"), submit = $("input[type=submit]"),
+		file = $("input[type=file]"), path = $("input[type=text]"), log = $("div.log")
+
+	/** @param {string} selector, @param {HTMLElement} context @return {HTMLElement|null} */
+	function $(selector, context = document) {
+		return context.querySelector(selector)
+	}
+
+	function updateProgressBar(percentage) {
+		try {
+			progress.innerText = (progress.value = percentage) + "%"
+		}
+		catch (err) {
+			console.log("PROGRESS ERROR:", err)
+		}
+	}
+
+	function writeLog(text) {
+		log.innerText += text + "\r\n"
+		log.scrollTop = log.scrollHeight
+	}
+
+	/** @param {string} url @param {FormData} data @return {Promise<string>} */
+	function uploadAsync(url, data) {
+		return new Promise(function(resolve, reject) {
+			const xhr = new XMLHttpRequest()
+			xhr.upload.onprogress = function(evt) {
+				if (evt.lengthComputable) {
+					updateProgressBar(Math.round(evt.loaded / evt.total * 100))
+					// console.log(`Upload progress: ${Math.round(evt.loaded / evt.total * 100)}% (${evt.loaded} / ${evt.total})`)
+				}
+			}
+			xhr.onload = function() {
+				if (xhr.status >= 200 && xhr.status < 300)
+					resolve(xhr.responseText)
+				else reject(new Error(`HTTP Error ${xhr.status} - ${xhr.statusText}`))
+			}
+			xhr.onerror = function() {
+				reject(new Error("Network error"));
+			}
+			xhr.onabort = function() {
+				reject(new Error("Upload aborted"));
+			}
+			xhr.open("POST", url, true)
+			xhr.send(data)
+		})
+	}
+
+	file.onchange = function(evt) {
+		path.value = (path.disabled = evt.target.value.endsWith(".bin"))
+			? "DEVICE" : "/webui/pages/" + evt.target.value.match(/[^\\/]+$/)?.at(0)
+	}
+
+	$("form").onsubmit = async function(evt) {
+		evt.preventDefault()
+		if (path.value && file.value) {
+			const data = new FormData(evt.target)
+			submit.disabled = path.disabled = file.disabled = true
+			progress.classList.remove("hidden")
+			writeLog(path.value === "DEVICE"
+				? `Uploading ${file.files[0].name} to DEVICE...`
+				: `Uploading ${file.files[0].name} as\r\n\t${path.value}...`)
+			try {
+				const msg = await uploadAsync(window.location.pathname, data)
+				writeLog(msg);
+			}
+			catch (err) {
+				writeLog(err);
+			}
+			progress.classList.add("hidden")
+			submit.disabled = path.disabled = file.disabled = false
+			file.value = path.value = null
+		}
+	}
+
+	file.value = path.value = null
+</script>

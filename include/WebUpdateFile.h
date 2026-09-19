@@ -1,7 +1,5 @@
 #pragma once
 
-#pragma once
-
 #include <Arduino.h>
 #include <LittleFS.h>
 #include <Update.h>
@@ -10,6 +8,7 @@
 #include <util/format.h>
 #include <Log.h>
 #include "WebPageBuilder.h"
+#include "WebServerEx.h"
 
 class WebUpdateFile {
     const __FlashStringHelper* _page;
@@ -67,7 +66,7 @@ public:
                         LOG.annotateVal(F("Updating file"), path);
                         _file = LittleFS.open(path, "w");
                         if(!_file)
-                            setError(F("Failed to open file"));
+                            setError(F("Failed to create file"));
                     }
                     else setError(format(F("Invalid destination: '%s'"), HTTP.arg(F("path")).c_str()));
                 }

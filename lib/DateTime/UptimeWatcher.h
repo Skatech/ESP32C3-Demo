@@ -17,6 +17,7 @@ protected:
     void __task_proc() {
         _started = DateTime::now() - millis() / 1000;
         SCHEDULER.remove(this);
+        LOG.annotateVal(F("Time syncronized"), _started.toString());
     }
 
 public:

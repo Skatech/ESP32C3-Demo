@@ -53,6 +53,6 @@
 </div><h1></h1>
 <script>
 document.querySelector("input[type=file]").onchange = function(e) {
-	document.querySelector("input[type=text]").value = "/webui/templates/" + e.target.value.match(/[^\\/]+$/)?.at(0)
+	document.querySelector("input[type=text]").value = "/webui/pages/" + e.target.value.match(/[^\\/]+$/)?.at(0)
 }
 </script>
