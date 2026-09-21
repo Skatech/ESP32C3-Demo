@@ -5,52 +5,90 @@
 	<link rel="icon" href="data:,">
 	<link rel="stylesheet" href="/styles.css">
 	<style>
+	:root {
+		--padding-v: .375rem;
+		--padding-h: .75rem;
+	}
 	form {
 		display: flex;
 		flex-direction: column;
-		margin: 1.5em 0;
 	}
 	label {
-		color: LinkText;
+		margin-top: 1em;
+		margin-bottom: 0.25em;
+	}
+	input {
+		display: block;
+		box-sizing: border-box;
+		padding: var(--padding-v) var(--padding-h);
+		font-size: 1rem;
+		font-weight: 400;
+		border: 1px solid ButtonBorder;
+		border-radius: var(--padding-v);
+	}
+	input:focus-visible {
+		outline: none;
+		box-shadow: 0 0 0.2rem SelectedItem;
 	}
 	input[type=text] {
-		box-sizing: border-box;
-		margin-bottom: 2em;
-		padding: 0.1em 0;
 		width: 100%;
-		font-size: medium;
-	}
-	input[type=submit] {
-		margin-left: auto;
-	}
-	input[type=submit], input[type=file]::file-selector-button {
-		padding: 0.1em 0;
-		min-width: 5.5em;
-		font-size: medium;
+		background-color: inherit;
 	}
 	input[type=file] {
 		width: 100%;
-		margin-bottom: 2em;
-		font-size: medium;
-		color: CanvasText;
 	}
-	progress {
-		width: 100%;
-		margin: 1.5em 0;
+	input[type=file]::file-selector-button {
+		padding: inherit;
+		margin: calc(0rem - var(--padding-v)) calc(0rem - var(--padding-h));
+		margin-inline-end: var(--padding-h);
+		border: inherit;
+		border-width: 0;
+		border-inline-end-width: 1px;
+	}
+	input[type=submit] {
+		width: 7em;
+		margin: 2em 0;
+		margin-left: auto;
+		background-color: AccentColor;
+		border-color: AccentColor;
 	}
 	.hidden {
-		visibility: hidden;
+		visibility: collapse;
 	}
 	div.log {
-		overflow-y: auto;
-		/* border: 1px solid ButtonBorder; */
+		border: 1px solid ButtonBorder;
+		border-radius: var(--padding-v);
+		margin: 0;
 		padding: 5px;
 		flex-grow: 1;
 		overflow-y: auto;
-		margin: 0;
 		white-space: pre;
 		font-family: consolas;
 		font-size: 0.9rem;
+	}
+	div.progress {
+		box-sizing: border-box;
+		width: 100%;
+		margin-bottom: 1em;
+		border: 1px solid ButtonBorder;
+		border-radius: var(--padding-v);
+		background-color: ButtonFace;
+		overflow: hidden;
+		position: relative;
+	}
+	div.progress :first-child {
+		display: table;
+		height: 19px;
+		width: 0%;
+		background: AccentColor;
+		text-align: center;
+		vertical-align: middle;
+	}
+	div.progress :last-child {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
 	}
 	</style>
 	<title>Device UPDATE</title>
@@ -62,15 +100,17 @@
 	<a href='/admin'>ADMIN</a>
 </div>
 <form method="POST" action="#" enctype="multipart/form-data">
-	<label>OUTPUT PATH:<input type="text" name="path" required disabled></label>
-	<label>UPLOAD FILE:<input type="file" name="file" accept="*/*" required></label>
+	<label>OUTPUT PATH:</label>
+	<input type="text" name="path" required disabled>
+	<label>UPLOAD FILE:</label>
+	<input type="file" name="file" accept="*/*" required>
 	<input type="submit" value="Upload">
 </form>
-<progress class="hidden" max="100" value="0">0%</progress>
+<div class="progress hidden"><div></div><div>0%</div></div>
 <div class="log"></div>
 
 <script>
-	const progress = $("progress"), submit = $("input[type=submit]"),
+	const progress = $("div.progress"), submit = $("input[type=submit]"),
 		file = $("input[type=file]"), path = $("input[type=text]"), log = $("div.log")
 
 	/** @param {string} selector, @param {HTMLElement} context @return {HTMLElement|null} */
@@ -78,13 +118,10 @@
 		return context.querySelector(selector)
 	}
 
-	function updateProgressBar(percentage) {
-		try {
-			progress.innerText = (progress.value = percentage) + "%"
-		}
-		catch (err) {
-			console.log("PROGRESS ERROR:", err)
-		}
+	function updateProgress(percentage) {
+		progress.firstChild.style.width = 
+			progress.lastChild.innerText = percentage + "%"
+		progress.classList.remove("hidden")		
 	}
 
 	function writeLog(text) {
@@ -98,8 +135,8 @@
 			const xhr = new XMLHttpRequest()
 			xhr.upload.onprogress = function(evt) {
 				if (evt.lengthComputable) {
-					updateProgressBar(Math.round(evt.loaded / evt.total * 100))
-					// console.log(`Upload progress: ${Math.round(evt.loaded / evt.total * 100)}% (${evt.loaded} / ${evt.total})`)
+					updateProgress(Math.round(evt.loaded / evt.total * 100))
+					console.log(`Upload progress: ${Math.round(evt.loaded / evt.total * 100)}% (${evt.loaded} / ${evt.total})`)
 				}
 			}
 			xhr.onload = function() {
@@ -125,10 +162,9 @@
 
 	$("form").onsubmit = async function(evt) {
 		evt.preventDefault()
-		if (path.value && file.value) {
+		if (path.value && file.value && window.location.hostname) {
 			const data = new FormData(evt.target)
 			submit.disabled = path.disabled = file.disabled = true
-			progress.classList.remove("hidden")
 			writeLog(path.value === "DEVICE"
 				? `Uploading ${file.files[0].name} to DEVICE...`
 				: `Uploading ${file.files[0].name} as\r\n\t${path.value}...`)

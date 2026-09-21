@@ -10,13 +10,14 @@
 #include <Log.h>
 #include <PerformanceCounter.h>
 #include <DelayedRestart.h>
-#include "WebServerEx.h"
-#include "WebPageBuilder.h"
+#include <WebServerEx.h>
+#include <WebPageBuilder.h>
+#include <WebUpdate.h>
 
 #define HTTP_SERVER_PORT 80
 
 WebServerEx HTTP(HTTP_SERVER_PORT);
-
+WebUpdate UPDATE;
 extern PerformanceCounter PERF;
 
 void httpInit() {
@@ -39,7 +40,7 @@ void httpInit() {
 
     HTTP.on(F("/admin/logs"), HTTP_GET, [&]() {
         if (HTTP.isAuthenticated())
-            HTTP.file(F("/webui/pages/device-logs.html"));
+            HTTP.file(F("/webui/pages/admin-logs.html"));
         else HTTP.forbidden();
     });
 
@@ -55,7 +56,7 @@ void httpInit() {
             HTTP.html(WebPageBuilder(F("Device RESTART"))
                 .addReloadScript(5000, F("/admin")).toString(
                     F("<h2>SUCCEEDED</h2><h4>Wait until device restarted...</h4>")));
-            RESTART.after(500);
+            SYS::restartAfter(500);
         }
         else HTTP.forbidden();
     });
@@ -105,7 +106,9 @@ void httpInit() {
         //     HTTP.uri().c_str()), 404);
     });
 
-    HTTP.serveStatic("/", LittleFS, "/webui/static/", "no-cache"); //"max-age=3600" or "no-cache"
+    // UPDATE.init(F("/admin/update"), F("/webui/pages/admin-update.html"));
+    UPDATE.init();
+    HTTP.serveStatic("/", LittleFS, "/webui/static/", "no-cache"); //"max-age=3600" or "no-cache"    
     HTTP.begin();
     HTTP.setAuthData(F(AUTH_DATA));
     MDNS.addService(F("http"), F("tcp"), HTTP_SERVER_PORT);

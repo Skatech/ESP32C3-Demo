@@ -6,6 +6,7 @@
 
 #include <util/noncopyable.h>
 #include <util/format.h>
+#include <util/tokenizer.h>
 #include <util/ip.h>
 #include <TaskScheduler.h>
 

@@ -1,6 +1,6 @@
 html {
 	color-scheme: light dark;
-	font-family: sans-serif;
+	font-family: "Segoe UI", -apple-system, Arial, Verdana, sans-serif;
 }
 body { 
 	display: flex;
@@ -12,10 +12,10 @@ body {
 	padding: 0;
 }
 hr {
-	margin: 0.5em 0;
+	margin: 0;
 }
 div.links {
-	margin: 0.25em 0 1em 0;
+	margin: 0.5em 0 1.5em 0;
 	width: 100%;
 	display: flex;
 	flex-wrap: wrap;

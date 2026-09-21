@@ -27,9 +27,11 @@ void initTimeSync() {
     tokenizer st(F(SYNC_TIME));
     String tz = st.next(), s1 = st.next(), s2 = st.next(), s3 = st.next();
     if (tz.length() && s1.length()) {
-        if (!LOG.annotateOp(F("Initializing SNTP"), tz,
-                SNTPControl::setup(std::move(tz), std::move(s1), std::move(s2), std::move(s3))))
-            SYS::panic(F("Unable to initialize SNTP, device HALTED"));
+        if (LOG.annotateOp(F("Initializing SNTP"), tz,
+                SNTPControl::setup(std::move(tz), std::move(s1), std::move(s2), std::move(s3)))) {
+            LOG.println(SNTPControl::toString());
+        }
+        else SYS::panic(F("Unable to initialize SNTP, device HALTED"));
     }
     else LOG.println(F("SNTP settings not defined"));
 }
