@@ -8,7 +8,7 @@
 #include <Log.h>
 #include <TaskScheduler.h>
 
-class UptimeWatcher : Task {
+class UptimeWatcher: public Task {
     DateTime _started;
 
 protected:

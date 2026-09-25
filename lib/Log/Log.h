@@ -75,11 +75,11 @@ public:
     }
 
     inline Log& print(const IPAddress& value) {
-        return print(value == INADDR_NONE ? value.toString() : F("0.0.0.0"));
+        return print(value != INADDR_NONE ? value.toString() : F("0.0.0.0"));
     }
 
     inline Log& println(const IPAddress& value) {
-        return println(value == INADDR_NONE ? value.toString() : F("0.0.0.0"));
+        return println(value != INADDR_NONE ? value.toString() : F("0.0.0.0"));
     }
 
     bool annotateOp(const __FlashStringHelper* title, bool success) {

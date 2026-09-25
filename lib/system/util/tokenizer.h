@@ -18,6 +18,11 @@ public:
         return strtok_r(_token, _delim, &_token);
     }
 
+    const char* next(const char* replacenull) {
+        const char* str = next();
+        return str ? str : replacenull;
+    }
+
     size_t read(const char** array, size_t count) {
         size_t i = 0;
         for (const char* n; i < count && (n = next()); ++i)

@@ -7,8 +7,14 @@
 #include <system.h>
 #include <util/format.h>
 #include <util/tokenizer.h>
+#include <util/ip.h>
 #include <Log.h>
 #include <SNTPControl.h>
+#include <ConnectService.h>
+#include "ConfigFile.h"
+
+enum DeviceConfig { HOSTNAME, CONNDATA, TIMEDATA, AUTHDATA, SSIDDATA };
+ConfigFile CFG(F("/config/device.cfg"));
 
 void initSerial() {
     Serial.setDebugOutput(false);
@@ -23,8 +29,17 @@ void initFileSystem() {
         SYS::panic(F("Unable to initialize filesystem, device HALTED"));
 }
 
+void loadDeviceConfig() {
+    if (!LOG.annotateOp(F("Loading device configuration"), CFG.load()))
+        SYS::panic(F("Unable to load device configuration, device HALTED"));
+}
+
+bool saveDeviceConfig() {
+    return LOG.annotateOp(F("Saving device configuration"), CFG.save());
+}
+
 void initTimeSync() {
-    tokenizer st(F(SYNC_TIME));
+    tokenizer st(CFG.copy(TIMEDATA));
     String tz = st.next(), s1 = st.next(), s2 = st.next(), s3 = st.next();
     if (tz.length() && s1.length()) {
         if (LOG.annotateOp(F("Initializing SNTP"), tz,
@@ -37,69 +52,31 @@ void initTimeSync() {
 }
 
 void initNetwork() {
-    String host(F(CONN_HOST));
-    IPAddress addr, gate, mask, dns1, dns2;
-    if (!LOG.annotateOp(F("Loading IP configuration"),
-            addr.fromString(F(CONN_ADDR)) && gate.fromString(F(CONN_GATE)) && mask.fromString(F(CONN_MASK)))) {
-        SYS::panic(F("Unable to load IP configuration, device HALTED"));
-    }
-    dns1.fromString(F(CONN_DNS1));
-    dns2.fromString(F(CONN_DNS2));
+    tokenizer st(CFG.copy(CONNDATA));
+    IPAddress addr = IP::fromString(st.next()),
+        mask = IP::fromString(st.next()), gate = IP::fromString(st.next()),
+        dns1 = IP::fromString(st.next()), dns2 = IP::fromString(st.next());
 
+    // if (!LOG.annotateOp(F("Loading IP configuration"), addr.fromString(st.next())
+    //         && mask.fromString(st.next()) && gate.fromString(st.next()))) {
+    //     SYS::panic(F("Unable to load IP configuration, device HALTED"));
+    // }
+    // dns1.fromString(st.next());
+    // dns2.fromString(st.next());
+    
     WiFi.disconnect();
     if (!LOG.annotateOp(F("Changing IP configuration"), WiFi.mode(WIFI_STA)
-            && WiFi.config(addr, gate, mask, dns1, dns2) && WiFi.hostname(host))) {
+            && WiFi.config(addr, gate, mask, dns1, dns2) && WiFi.hostname(CFG[HOSTNAME]))) {
         SYS::panic(F("Unable to configure IP, device HALTED"));
     }
-}
-
-void beginConnect(const String& customSSID = "") {
-    SYS::led(true);
-    // MDNS.end();
-    WiFi.persistent(false);
-    String ssid(F(CONN_SSID)), pass(F(CONN_PASS));
-    ssid = customSSID.isEmpty() ? ssid : customSSID;
-    if (!LOG.annotateOp(F("Starting connection"), ssid, WiFi.disconnect() 
-            && (WiFi.begin(ssid, pass) == WL_DISCONNECTED || WiFi.status() == WL_CONNECTED))) {
-        SYS::panic(F("Unable to start connection, device HALTED"));
-    }
+    CONNSVC.init(String(CFG[SSIDDATA])); 
 }
 
 bool initNameServices() {
-    String host(F(CONN_HOST));
+    String host = CFG.copy(HOSTNAME);
     if (!host.isEmpty()) {
-        return LOG.annotateOp(F("Initializing mDNS"), String(WiFi.getHostname()) + F(".local"),
-            MDNS.begin(WiFi.getHostname())/* && MDNS.addService(F("http"), F("tcp"), 80)*/);
+        return LOG.annotateOp(F("Initializing mDNS"), host + F(".local"),
+            MDNS.begin(host.c_str())/* && MDNS.addService(F("http"), F("tcp"), 80)*/);
     }
     return false;
-}
-
-void onConnectionStatusChangedEvent();
-
-bool watchConnection() {
-    static wl_status_t statusp = WL_DISCONNECTED;
-    const auto status = WiFi.status();
-    if (status != statusp)  {
-        if (status == WL_CONNECTED) {
-            LOG.println(format(F("Connected %s, RSSI: %s\r\nIP address: %s"), WiFi.SSID().c_str(),
-                rssiToString(WiFi.RSSI()).c_str(), WiFi.localIP().toString().c_str()));
-
-            // LOG.println(format(F("Connected to AP %s:\r\n  - RSSI: %s\r\n  - IP: %s"),
-            //     WiFi.SSID().c_str(), rssiToString(WiFi.RSSI()).c_str(), WiFi.localIP().toString().c_str()));
-            SYS::led(false);
-            // initNameServices();
-        }
-        else if (statusp == WL_CONNECTED) {
-            LOG.println(F("Connection LOST"));
-            SYS::led(true);
-        }
-        else {
-            LOG.annotateVal(F("Connection status changed"), wifiStatusToString(status));
-            SYS::led(status != WL_CONNECTED);
-        }
-        onConnectionStatusChangedEvent();
-    }
-    // if(status == WL_CONNECTED && MDNS.isRunning())
-    //     MDNS.update();
-    return (statusp = status) == WL_CONNECTED;
 }

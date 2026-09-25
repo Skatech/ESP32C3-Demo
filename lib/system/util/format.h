@@ -27,9 +27,13 @@ https://cplusplus.com/reference/cstdio/printf  may require build_flags: -Wl,-u,v
 String format(const __FlashStringHelper* format, ...);
 
 // Return string: "-NN dBm (quality description)"
-String rssiToString(int8_t rssi);
+String rssiToString(int8_t rssi, const __FlashStringHelper* blank = F("-"));
 
 String wifiStatusToString(wl_status_t status);
 
 // Return time-span string: "D:HH:MM:SS"
 String timeSpanToString(uint32_t seconds, bool full = false);
+
+String stringReplaceAll(String&& str, const __FlashStringHelper* sub, const __FlashStringHelper* rep);
+
+String macroToString(const __FlashStringHelper* macro);

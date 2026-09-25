@@ -26,7 +26,14 @@ public:
         _tasks.reserve(capacity);
     }
 
-    uint16_t count() {
+    uint16_t count(bool active = false) {
+        if (active) {
+            uint16_t count;
+            for (uint16_t i = 0; i < _tasks.size(); ++i)
+                if (_tasks[i]->__task_trottle())
+                    count++;
+            return count;
+        }
         return _tasks.size();
     }
 

@@ -3,7 +3,7 @@
 namespace IP {
 
 IPAddress fromString(const char* str) {
-    IPAddress addr; addr.fromString(str);
+    IPAddress addr; if (str) addr.fromString(str);
     return addr;
 }
 

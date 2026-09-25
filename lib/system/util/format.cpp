@@ -32,13 +32,13 @@ String format(const __FlashStringHelper* format, ...) {
     return buffer;
 }
 
-String rssiToString(int8_t rssi) {
+String rssiToString(int8_t rssi, const __FlashStringHelper* blank) {
    const __FlashStringHelper* descr = rssi < -80 ? F("very weak")
         : rssi < -70 ? F("weak")
         : rssi < -60 ? F("acceptable")
         : rssi < -50 ? F("good")
         : rssi < -40 ? F("very good") : F("excellent");
-    return format(F("%i dBm (%S)"), rssi, descr);
+    return rssi ? format(F("%i dBm (%S)"), rssi, descr) : blank;
 }
 
 String wifiStatusToString(wl_status_t status) {
@@ -66,4 +66,14 @@ String timeSpanToString(uint32_t seconds, bool full) {
         }
     }
     return buf;
+}
+
+String stringReplaceAll(String&& str, const __FlashStringHelper* sub, const __FlashStringHelper* rep) {
+    while(str.lastIndexOf(sub) >= 0)
+        str.replace(sub, rep);
+    return str;
+}
+
+String macroToString(const __FlashStringHelper* macro) {
+    return stringReplaceAll(macro, F("/#"), F("#"));
 }

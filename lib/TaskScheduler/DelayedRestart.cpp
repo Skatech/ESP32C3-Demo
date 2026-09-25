@@ -17,7 +17,7 @@ protected:
 
 public:
     bool after(uint32_t delay) {
-        if (!SCHEDULER.contains(this) && SCHEDULER.add(this)) {
+        if (SCHEDULER.add(this)) {
             _start = millis();
             _delay = delay;
             LOG.println(format(F("Device restart scheduled after %lu ms"), _delay));
@@ -28,6 +28,6 @@ public:
 };
 
 bool SYS::restartAfter(uint32_t delay) {
-    static DelayedRestart rst;
+    static DelayedRestart rst;    
     return rst.after(delay);
 }

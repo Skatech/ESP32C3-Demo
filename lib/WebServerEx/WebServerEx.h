@@ -45,8 +45,8 @@ public:
     }
 
     void file(const String& filepath, int code = 200) {
-        File file = LittleFS.open(filepath, "r");
-        if (file) {
+        File file;
+        if (LittleFS.exists(filepath) && (file = LittleFS.open(filepath, "r"))) {
             streamFile(file, getContentType(filepath)); // stream(file, getContentType(filepath));
             file.close();
         }

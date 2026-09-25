@@ -1,0 +1,11 @@
+; device configuration file example, rename to device.cfg and remove all comments
+; line #0, device host name
+myhostname
+; line #1, device network settings: deviceip subnetmask gatewayip opt-dnsip1 opt-dnsip2
+192.168.0.89 255.255.255.0 192.168.0.1 192.168.0.1
+; line #2, device time settings: timezone opt-timeserver1 opt-timeserver2 opt-timeserver3
+MSK-3 192.168.0.20 1.ru.pool.ntp.org time.nist.gov
+; line #3, device authentication settings: username password opt-adminip-or-iprange-begin opt-iprange-end
+admin mypass 192.168.0.20 192.168.0.255
+; line #4, device connection settings: ssidname1 password1 opt-ssidname2 opt-password2 ...
+MYSSID myssidpass MYSSIDRESERVE myssidreservepass

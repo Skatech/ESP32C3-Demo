@@ -6,7 +6,7 @@ body {
 	display: flex;
 	flex-direction: column;
 	width: 400px;
-	max-width: min(32em, 100vw);
+	max-width: min(32em, 96vw);
 	height: calc(100dvh - 0.55em);
 	margin: 0 auto;
 	padding: 0;
